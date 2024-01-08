@@ -1,0 +1,55 @@
+-- Таблица пользователей
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    login VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    mail VARCHAR(100) NOT NULL,
+    nickname VARCHAR(50) UNIQUE,
+    avatar_link VARCHAR(255)
+);
+
+-- Таблица рейтингов
+CREATE TABLE ratings (
+    rating_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id),
+    rated_good INTEGER,
+    rated_bad INTEGER
+);
+
+-- Таблица заказов
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id),
+    rating_id INTEGER REFERENCES ratings(rating_id),
+    online_status BOOLEAN,
+    price DECIMAL(10,2),
+    min_amount DECIMAL(10,2),
+    max_amount DECIMAL(10,2),
+    payment_method VARCHAR(50),
+    comment TEXT,
+    transaction_type VARCHAR(50) CHECK (transaction_type IN ('buy', 'sell')),
+    crypto_type VARCHAR(50),
+    currency VARCHAR(50)
+);
+
+-- Таблица кошельков
+CREATE TABLE wallets (
+    wallet_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id),
+    network VARCHAR(50) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    balance DECIMAL(10,2),
+    last_transaction_date TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Таблица транзакций
+CREATE TABLE transactions (
+    transaction_id SERIAL PRIMARY KEY,
+    wallet_id INTEGER REFERENCES wallets(wallet_id),
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_date TIMESTAMP NOT NULL,
+    sender_address VARCHAR(255) NOT NULL,
+    transaction_type VARCHAR(50) CHECK (transaction_type IN ('send', 'receive')),
+    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id)
+);
